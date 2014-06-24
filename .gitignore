@@ -3,10 +3,6 @@
 #################
 compiled/
 include/
-*-ig/
-*-ig.sp
-*-ig.cfg
-*-ig.txt
 *.exe
 *.dat
 *.sh

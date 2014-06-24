@@ -3,7 +3,7 @@
 #include <sdktools>
 #include <tf2>
 
-#define PLUGIN_VERSION	"2.1"
+#define PLUGIN_VERSION	"2.2"
 
 new Handle:kv;
 new Float:telepoint[5][3];
@@ -105,8 +105,12 @@ public Action:Command_TeleportMenu(client, args)
 }
 public MasterTeleMenuCallback(Handle:menu, MenuAction:action, client, param2)
 {
-	if (action == MenuAction_Select)
+  if (action == MenuAction_End)
 	{
+    CloseHandle(menu);
+  }
+  if (action == MenuAction_Select)
+  {
 		new String:act[20];
 		GetMenuItem(menu, param2, act, sizeof(act));
 		if(StrEqual(act, "teleport"))
@@ -125,7 +129,7 @@ public MasterTeleMenuCallback(Handle:menu, MenuAction:action, client, param2)
 			ReplyToCommand(client, "[SM]Error: Wut did you do? You broke it, try again.");
 			CloseHandle(menu);
 		}
-	}
+  }
 }
 
 public TeleMenuCallback(Handle:menu, MenuAction:action, client, param2)
@@ -163,7 +167,6 @@ public TeleMenuCallback(Handle:menu, MenuAction:action, client, param2)
 			}
 		}
 	}
-	CloseHandle(menu);
 }
 
 TeleOut(client)
