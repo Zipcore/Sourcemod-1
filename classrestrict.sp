@@ -4,7 +4,7 @@
 #include <tf2_stocks>
 #include <morecolors>
 
-#define PL_VERSION "1.0"
+#define PL_VERSION "1.2"
 
 #define TF_CLASS_DEMOMAN		4
 #define TF_CLASS_ENGINEER		9
@@ -45,24 +45,24 @@ public OnPluginStart()
 	g_hEnabled                                = CreateConVar("sm_classrestrict_enabled",       "1",  "Enable/disable restricting classes in TF2.");
 	g_hFlags                                  = CreateConVar("sm_classrestrict_flags",         "",   "Admin flags for restricted classes in TF2.");
 	g_hImmunity                               = CreateConVar("sm_classrestrict_immunity",      "0",  "Enable/disable admins being immune for restricted classes in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_DEMOMAN]  = CreateConVar("sm_classrestrict_blu_demomen",   "-1", "Limit for Blu demomen in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_ENGINEER] = CreateConVar("sm_classrestrict_blu_engineers", "-1", "Limit for Blu engineers in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_HEAVY]    = CreateConVar("sm_classrestrict_blu_heavies",   "-1", "Limit for Blu heavies in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_MEDIC]    = CreateConVar("sm_classrestrict_blu_medics",    "-1", "Limit for Blu medics in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_PYRO]     = CreateConVar("sm_classrestrict_blu_pyros",     "-1", "Limit for Blu pyros in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_SCOUT]    = CreateConVar("sm_classrestrict_blu_scouts",    "-1", "Limit for Blu scouts in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_SNIPER]   = CreateConVar("sm_classrestrict_blu_snipers",   "-1", "Limit for Blu snipers in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_SOLDIER]  = CreateConVar("sm_classrestrict_blu_soldiers",  "-1", "Limit for Blu soldiers in TF2.");
-	g_hLimits[TF_TEAM_BLU][TF_CLASS_SPY]      = CreateConVar("sm_classrestrict_blu_spies",     "-1", "Limit for Blu spies in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_DEMOMAN]  = CreateConVar("sm_classrestrict_red_demomen",   "-1", "Limit for Red demomen in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_ENGINEER] = CreateConVar("sm_classrestrict_red_engineers", "-1", "Limit for Red engineers in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_HEAVY]    = CreateConVar("sm_classrestrict_red_heavies",   "-1", "Limit for Red heavies in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_MEDIC]    = CreateConVar("sm_classrestrict_red_medics",    "-1", "Limit for Red medics in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_PYRO]     = CreateConVar("sm_classrestrict_red_pyros",     "-1", "Limit for Red pyros in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_SCOUT]    = CreateConVar("sm_classrestrict_red_scouts",    "-1", "Limit for Red scouts in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_SNIPER]   = CreateConVar("sm_classrestrict_red_snipers",   "-1", "Limit for Red snipers in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_SOLDIER]  = CreateConVar("sm_classrestrict_red_soldiers",  "-1", "Limit for Red soldiers in TF2.");
-	g_hLimits[TF_TEAM_RED][TF_CLASS_SPY]      = CreateConVar("sm_classrestrict_red_spies",     "-1", "Limit for Red spies in TF2.");
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_DEMOMAN]  = CreateConVar("sm_classrestrict_blu_demoman",   "-1", "Limit for Blu demomen in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_ENGINEER] = CreateConVar("sm_classrestrict_blu_engineer",  "-1", "Limit for Blu engineers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_HEAVY]    = CreateConVar("sm_classrestrict_blu_heavy",     "-1", "Limit for Blu heavies in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_MEDIC]    = CreateConVar("sm_classrestrict_blu_medic",     "-1", "Limit for Blu medics in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_PYRO]     = CreateConVar("sm_classrestrict_blu_pyro",      "-1", "Limit for Blu pyros in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_SCOUT]    = CreateConVar("sm_classrestrict_blu_scout",     "-1", "Limit for Blu scouts in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_SNIPER]   = CreateConVar("sm_classrestrict_blu_sniper",    "-1", "Limit for Blu snipers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_SOLDIER]  = CreateConVar("sm_classrestrict_blu_soldier",   "-1", "Limit for Blu soldiers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_BLU][TF_CLASS_SPY]      = CreateConVar("sm_classrestrict_blu_spy",       "-1", "Limit for Blu spies in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_DEMOMAN]  = CreateConVar("sm_classrestrict_red_demoman",   "-1", "Limit for Red demomen in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_ENGINEER] = CreateConVar("sm_classrestrict_red_engineer",  "-1", "Limit for Red engineers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_HEAVY]    = CreateConVar("sm_classrestrict_red_heavy",     "-1", "Limit for Red heavies in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_MEDIC]    = CreateConVar("sm_classrestrict_red_medic",     "-1", "Limit for Red medics in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_PYRO]     = CreateConVar("sm_classrestrict_red_pyro",      "-1", "Limit for Red pyros in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_SCOUT]    = CreateConVar("sm_classrestrict_red_scout",     "-1", "Limit for Red scouts in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_SNIPER]   = CreateConVar("sm_classrestrict_red_sniper",    "-1", "Limit for Red snipers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_SOLDIER]  = CreateConVar("sm_classrestrict_red_soldier",   "-1", "Limit for Red soldiers in TF2.", FCVAR_NOTIFY);
+	g_hLimits[TF_TEAM_RED][TF_CLASS_SPY]      = CreateConVar("sm_classrestrict_red_spy",       "-1", "Limit for Red spies in TF2.", FCVAR_NOTIFY);
 	
 	HookEvent("player_changeclass", Event_PlayerClass);
 	HookEvent("player_spawn",       Event_PlayerSpawn);
