@@ -1,6 +1,6 @@
 #include <sourcemod>
 
-#define PLUGIN_VERSION 			"1.2.2"
+#define PLUGIN_VERSION 			"1.2.3"
 
 public Plugin:myinfo =
 {
@@ -17,7 +17,8 @@ new g_bKSToggle[MAXPLAYERS+1] = {false,...};
 
 public OnPluginStart()
 {
-	RegAdminCmd("sm_killstreak", Killstreak, ADMFLAG_GENERIC, "Turns killstreak effects on on a player");
+	RegConsoleCmd("sm_killstreak", Killstreak);
+	RegConsoleCmd("sm_ks", Killstreak);
 	sm_killstreak_amount = CreateConVar("sm_killstreak_amount", "15", "Default Killstreak Amount", FCVAR_PLUGIN|FCVAR_NOTIFY);
 	AutoExecConfig();
 	CreateConVar("sm_ks_version", PLUGIN_VERSION, "Killstreak modifier.", FCVAR_PLUGIN|FCVAR_NOTIFY);
@@ -30,7 +31,7 @@ public OnPlayerPutInServer(client)
 	g_bKSToggle[client] = false;
 }
 
-public Action:Killstreak( client, args )
+public Action:Killstreak(client, args)
 {
 	if(client)
 	{

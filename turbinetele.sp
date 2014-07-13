@@ -22,6 +22,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	CreateConVar("sm_turbinetele_version", PLUGIN_VERSION, "Turbine Teleports Version", FCVAR_SPONLY|FCVAR_NOTIFY|FCVAR_PLUGIN);
+	RegAdminCmd("sm_dteleports", Command_TeleportMenu, ADMFLAG_CUSTOM3);
 	RegAdminCmd("sm_teleports", Command_TeleportMenu, ADMFLAG_SLAY);
 	RegAdminCmd("sm_teleport_menu", Command_TeleportMenu, ADMFLAG_SLAY);
 }
