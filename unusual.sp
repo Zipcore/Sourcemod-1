@@ -5,21 +5,17 @@
 #include <tf2items>
 #include <tf2itemsinfo>
 
-#define PLUGIN_VERSION "2.15.0"
+#define PLUGIN_VERSION "2.15.1"
 #define EFFECTSFILE "unusual_list.cfg"
 #define PERMISSIONFILE "unusual_permissions.cfg"
 #define DATAFILE "unusual_effects.txt"
-#define WEBSITE "http://adf.ly/kuBHt"
-#define UPDATE_URL "http://bit.ly/1hvGhxA"
-
-
+#define WEBSITE "http://erreur500.comuv.com/unusual-effects/"
 
 new String:ClientSteamID[MAXPLAYERS+1][60];
 new String:UnusualEffect[PLATFORM_MAX_PATH];
 new String:EffectsList[PLATFORM_MAX_PATH];
 new String:PermissionsFile[PLATFORM_MAX_PATH];
 
-new Quality[MAXPLAYERS+1];
 new ClientItems[MAXPLAYERS+1];
 new ClientControl[MAXPLAYERS+1];
 
@@ -35,7 +31,7 @@ new Handle:g_hItem = INVALID_HANDLE;
 
 public Plugin:myinfo =
 {
-    name = "[TF2] Unusual Effects",
+    name = "[TF2] Unusual Effects JsFix",
     author = "Erreur 500",
     description = "Apply Unusual effects to your weapons",
     version = PLUGIN_VERSION,
@@ -314,7 +310,6 @@ public Action:TF2Items_OnGiveNamedItem(iClient, String:classname[], iItemDefinit
   new String:PlayerInfo[60];  
   new String:str_iItemDefinitionIndex[10];
   new Float:fltEffect;
-  new ItemQuality;
   new Effect;
   
   
@@ -337,7 +332,7 @@ public Action:TF2Items_OnGiveNamedItem(iClient, String:classname[], iItemDefinit
     CloseHandle(kv);
     return Plugin_Continue;
   }
-  ItemQuality = KvGetNum(kv, "quality", -1);
+
   Effect = KvGetNum(kv, "effect", -1);
   if(Effect == -1)
   {
@@ -349,8 +344,7 @@ public Action:TF2Items_OnGiveNamedItem(iClient, String:classname[], iItemDefinit
   CloseHandle(kv);
   
   TF2Items_SetAttribute(g_hItem, 0, 134, fltEffect);
-  if(ItemQuality > -1)
-    TF2Items_SetQuality(g_hItem, ItemQuality);
+  TF2Items_SetQuality(g_hItem, 5);
   hItem = g_hItem;
   //LogMessage("WEAPON %i, with %i for %i",iItemDefinitionIndex,Effect,iClient);
   return Plugin_Changed;
@@ -404,10 +398,9 @@ FirstMenu(iClient)
     SetMenuTitle(Menu1, "What do you want ?");
     AddMenuItem(Menu1, "0", "Add/modify weapons");
     AddMenuItem(Menu1, "1", "Delete effects");
-    AddMenuItem(Menu1, "2", "Show effects");
     
     if((GetConVarInt(c_PanelFlag) == 0 && (GetUserFlagBits(iClient) & ADMFLAG_ROOT)) || (GetConVarInt(c_PanelFlag) == 1 && ((GetUserFlagBits(iClient) & ADMFLAG_GENERIC) || (GetUserFlagBits(iClient) & ADMFLAG_ROOT)) ))
-      AddMenuItem(Menu1, "3", "Admin tools");
+      AddMenuItem(Menu1, "2", "Admin tools");
       
     SetMenuExitButton(Menu1, true);
     DisplayMenu(Menu1, iClient, MENU_TIME_FOREVER);
@@ -423,15 +416,10 @@ public Menu1_1(Handle:menu, MenuAction:action, iClient, args)
   else if (action == MenuAction_Select)
   {
     if(args == 0)
-      QualityMenu(iClient);
+      PanelEffect(iClient);
     else if(args == 1)
       DeleteWeapPanel(iClient);
     else if(args == 2)
-    {
-      FirstMenu(iClient);
-      ShowMOTDPanel(iClient, "Unusual effects", WEBSITE, MOTDPANEL_TYPE_URL );
-    }
-    else if(args == 3)
     {
       AdminToolMenu(iClient);
     }
@@ -620,70 +608,8 @@ bool:RemoveEffect(User, String:PlayerSteamID[60], String:WeapID[7])
 }
 
 //--------------------------------------------------------------------------------------
-//              Quality + Effect
+//              Effect
 //--------------------------------------------------------------------------------------
-
-QualityMenu(iClient)
-{
-  new Handle: kv;
-  kv = CreateKeyValues("Unusual_effects");
-  if(!FileToKeyValues(kv, UnusualEffect))
-  {
-    LogError("Can't open %s file",DATAFILE);
-    CloseHandle(kv);
-    return;
-  }
-  if(!isAuthorized(kv, ClientControl[iClient], true))
-  {
-    CPrintToChat(iClient, "%t", "Sent7");
-    CloseHandle(kv);
-    return;
-  }
-  CloseHandle(kv);
-  new EntitiesID = GetEntPropEnt(ClientControl[iClient], Prop_Data, "m_hActiveWeapon");
-  if(EntitiesID < 0)
-    return;
-  ClientItems[iClient] = GetEntProp(EntitiesID, Prop_Send, "m_iItemDefinitionIndex");
-  
-  decl String:Title[64];
-  decl String:WeapName[64];
-  new Handle:Qltymenu = CreateMenu(QltymenuAnswer);
-  
-  TF2II_GetItemName(ClientItems[iClient], WeapName, sizeof(WeapName)); 
-  Format(Title, sizeof(Title), "Select a quality: %s",WeapName);
-  SetMenuTitle(Qltymenu, Title);
-  
-  AddMenuItem(Qltymenu, "0", "normal");
-  AddMenuItem(Qltymenu, "1", "rarity1");
-  AddMenuItem(Qltymenu, "2", "rarity2");
-  AddMenuItem(Qltymenu, "3", "vintage");
-  AddMenuItem(Qltymenu, "4", "rarity3");
-  AddMenuItem(Qltymenu, "5", "rarity4");
-  AddMenuItem(Qltymenu, "6", "unique");
-  AddMenuItem(Qltymenu, "7", "community");
-  AddMenuItem(Qltymenu, "8", "developer");
-  AddMenuItem(Qltymenu, "9", "selfmade");
-  AddMenuItem(Qltymenu, "10", "customized");
-  AddMenuItem(Qltymenu, "11", "strange");
-  AddMenuItem(Qltymenu, "12", "completed");
-  AddMenuItem(Qltymenu, "13", "haunted");
-  
-  SetMenuExitButton(Qltymenu, true);
-  DisplayMenu(Qltymenu, iClient, MENU_TIME_FOREVER);
-}
-
-public QltymenuAnswer(Handle:menu, MenuAction:action, iClient, args)
-{
-  if (action == MenuAction_End)
-  {
-    CloseHandle(menu);
-  }
-  else if (action == MenuAction_Select)
-  {
-    Quality[iClient] = args;
-    PanelEffect(iClient);
-  }
-}
 
 PanelEffect(iClient)
 {
@@ -774,7 +700,7 @@ public UnusualMenuAnswer(Handle:menu, MenuAction:action, iClient, args)
     
     if(IsValidClient(ClientControl[iClient]))
     {
-      AddUnusualEffect(iClient, ClientSteamID[ClientControl[iClient]], ClientItems[iClient], Quality[iClient], StringToInt(Effect));
+      AddUnusualEffect(iClient, ClientSteamID[ClientControl[iClient]], ClientItems[iClient], StringToInt(Effect));
       
       if(IsValidClient(iClient))
       {
@@ -787,7 +713,7 @@ public UnusualMenuAnswer(Handle:menu, MenuAction:action, iClient, args)
   } 
 }
 
-bool:AddUnusualEffect(User, String:PlayerSteamID[60], WeaponID, WeapQuality, UnusualEffectID)
+bool:AddUnusualEffect(User, String:PlayerSteamID[60], WeaponID, UnusualEffectID)
 {
   if(WeaponID < 0)  // Is Valid ID
     return false;
@@ -844,7 +770,8 @@ bool:AddUnusualEffect(User, String:PlayerSteamID[60], WeaponID, WeapQuality, Unu
   
   
   Format(strName, sizeof(strName), "%d", WeaponID);
-  Format(strQuality, sizeof(strQuality), "%d", WeapQuality);
+  //Always 'Unusual' quality
+  Format(strQuality, sizeof(strQuality), "5");
   Format(Effect, sizeof(Effect), "%d", UnusualEffectID);
   
   KvJumpToKey(kv, strName, true);
