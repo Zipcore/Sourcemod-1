@@ -4,23 +4,13 @@
 #include <morecolors>
 #include <tf2items>
 #include <tf2itemsinfo>
-#include <unusual>
-#undef REQUIRE_PLUGIN
-#include <freak_fortress_2>
-#include <updater>
 
-
-
-#define PLUGIN_NAME         "Unusual"
-#define PLUGIN_AUTHOR       "Erreur 500"
-#define PLUGIN_DESCRIPTION  "Add Unusual effects on your weapons"
-#define PLUGIN_VERSION      "2.15.0"
-#define PLUGIN_CONTACT      "erreur500@hotmail.fr"
-#define EFFECTSFILE     "unusual_list.cfg"
-#define PERMISSIONFILE    "unusual_permissions.cfg"
-#define DATAFILE      "unusual_effects.txt"
-#define WEBSITE       "http://adf.ly/kuBHt"
-#define UPDATE_URL        "http://bit.ly/1hvGhxA"
+#define PLUGIN_VERSION "2.15.0"
+#define EFFECTSFILE "unusual_list.cfg"
+#define PERMISSIONFILE "unusual_permissions.cfg"
+#define DATAFILE "unusual_effects.txt"
+#define WEBSITE "http://adf.ly/kuBHt"
+#define UPDATE_URL "http://bit.ly/1hvGhxA"
 
 
 
@@ -33,30 +23,23 @@ new Quality[MAXPLAYERS+1];
 new ClientItems[MAXPLAYERS+1];
 new ClientControl[MAXPLAYERS+1];
 
-new bool:IsFF2Enabled = false;
 new bool:FirstControl[MAXPLAYERS+1] = {false, ...};
 
-new Permission[22]          = {0, ...};
-new FlagsList[21]           = {ADMFLAG_RESERVATION, ADMFLAG_GENERIC, ADMFLAG_KICK, ADMFLAG_BAN, ADMFLAG_UNBAN, ADMFLAG_SLAY, ADMFLAG_CHANGEMAP, ADMFLAG_CONVARS, ADMFLAG_CONFIG, ADMFLAG_CHAT, ADMFLAG_VOTE, ADMFLAG_PASSWORD, ADMFLAG_RCON, ADMFLAG_CHEATS, ADMFLAG_CUSTOM1, ADMFLAG_CUSTOM2, ADMFLAG_CUSTOM3, ADMFLAG_CUSTOM4, ADMFLAG_CUSTOM5, ADMFLAG_CUSTOM6, ADMFLAG_ROOT};
+new Permission[22] = {0, ...};
+new FlagsList[21] = {ADMFLAG_RESERVATION, ADMFLAG_GENERIC, ADMFLAG_KICK, ADMFLAG_BAN, ADMFLAG_UNBAN, ADMFLAG_SLAY, ADMFLAG_CHANGEMAP, ADMFLAG_CONVARS, ADMFLAG_CONFIG, ADMFLAG_CHAT, ADMFLAG_VOTE, ADMFLAG_PASSWORD, ADMFLAG_RCON, ADMFLAG_CHEATS, ADMFLAG_CUSTOM1, ADMFLAG_CUSTOM2, ADMFLAG_CUSTOM3, ADMFLAG_CUSTOM4, ADMFLAG_CUSTOM5, ADMFLAG_CUSTOM6, ADMFLAG_ROOT};
 
-new Handle:c_Control        = INVALID_HANDLE;
-new Handle:c_TeamRest       = INVALID_HANDLE;
-new Handle:c_PanelFlag        = INVALID_HANDLE;
-new Handle:c_FF2          = INVALID_HANDLE;
-new Handle:g_hItem          = INVALID_HANDLE;
-#if defined _updater_included
-new Handle:c_AutoUpdate       = INVALID_HANDLE;
-#endif
-
-
+new Handle:c_Control = INVALID_HANDLE;
+new Handle:c_TeamRest = INVALID_HANDLE;
+new Handle:c_PanelFlag = INVALID_HANDLE;
+new Handle:g_hItem = INVALID_HANDLE;
 
 public Plugin:myinfo =
 {
-    name        = PLUGIN_NAME,
-    author      = PLUGIN_AUTHOR,
-    description = PLUGIN_DESCRIPTION,
-    version     = PLUGIN_VERSION,
-    url         = PLUGIN_CONTACT
+    name = "[TF2] Unusual Effects",
+    author = "Erreur 500",
+    description = "Apply Unusual effects to your weapons",
+    version = PLUGIN_VERSION,
+    url = "erreur500@hotmail.fr"
 };
 
 public OnPluginStart()
@@ -65,10 +48,6 @@ public OnPluginStart()
   c_Control = CreateConVar("unusual_controlmod",  "0", "0 = no control, 1 = event spawn, 2 = event inventory", FCVAR_PLUGIN, true, 0.0, true, 2.0); 
   c_TeamRest  = CreateConVar("unusual_team_restriction",  "0", "0 = no restriction, 1 = red, 2 = blue can't have unusual effects", FCVAR_PLUGIN, true, 0.0, true, 2.0);
   c_PanelFlag = CreateConVar("unusual_panel_flag",  "0", "0 = ADMFLAG_ROOT, 1 = ADMFLAG_GENERIC", FCVAR_PLUGIN, true, 0.0, true, 1.0);  
-  c_FF2   = CreateConVar("unusual_fix_ff2boss",   "1", "0 = boss can have unusual effects, 1 = boss can't");  
-#if defined _updater_included
-  c_AutoUpdate = CreateConVar("unusual_autoupdate", "1", "If Updater plugin installed, autoupdate Unusual plugin.", FCVAR_PLUGIN );
-#endif
 
   HookEvent("player_spawn", EventPlayerSpawn, EventHookMode_Pre);
   HookEvent("post_inventory_application", EventPlayerInventory, EventHookMode_Post);
@@ -87,60 +66,21 @@ public OnPluginStart()
   TF2Items_SetNumAttributes(g_hItem, 1);
 }
 
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
-{
-  CreateNative("UE_AddUnusualEffect", Native_AddUnusualEffect);
-  CreateNative("UE_RemoveEffect", Native_RemoveEffect);
-  CreateNative("UE_RemovePlayerEffects", Native_RemovePlayerEffects);
-  CreateNative("UE_IsUnusualItem", Native_IsUnusualItem);
-  CreateNative("UE_GetUnusualItemQuality", Native_GetUnusualItemQuality);
-  CreateNative("UE_GetUnusualItemEffect", Native_GetUnusualItemEffect);
-  CreateNative("UE_GetUnusualItemNumber", Native_GetUnusualItemNumber);
-  CreateNative("UE_GetUnusualEffectPermission", Native_GetUnusualEffectPermission);
-  CreateNative("UE_SetUnusualEffectPermission", Native_SetUnusualEffectPermission);
-  
-  return APLRes_Success;
-}
-
 public OnMapStart() 
 {
   if(LoadPermissions())
   {
     LogMessage("Unusual effects permissions loaded !");
-    if(LibraryExists("freak_fortress_2"))
-      IsFF2Enabled = FF2_IsFF2Enabled();
   }
   else
   {
     LogMessage("Error while charging permissions !");
-    IsFF2Enabled = false;
   }
 }
 
 public OnClientAuthorized(iClient, const String:auth[])
 {
   strcopy(ClientSteamID[iClient], 60, auth);
-}
-
-public OnLibraryAdded( const String:strLibrary[] )
-{
-#if defined _updater_included
-  if(StrEqual( strLibrary, "updater", false ) && GetConVarBool(c_AutoUpdate))
-    Updater_AddPlugin(UPDATE_URL);
-#endif
-}
-
-public OnConfigsExecuted()
-{
-#if defined _updater_included
-  if(LibraryExists("updater"))
-  {
-    if(GetConVarBool(c_AutoUpdate))
-      Updater_AddPlugin(UPDATE_URL);
-    else
-      Updater_RemovePlugin();
-  }
-#endif
 }
 
 //--------------------------------------------------------------------------------------
@@ -368,12 +308,7 @@ public Action:TF2Items_OnGiveNamedItem(iClient, String:classname[], iItemDefinit
   
   new TeamRestriction = GetConVarInt(c_TeamRest); // Team restriction
   if(GetClientTeam(iClient) == TeamRestriction+1)
-    return Plugin_Continue;
-  
-  if(GetConVarInt(c_FF2) && IsFF2Enabled) // Freak Fortress 2 boss security
-    if(FF2_GetBossUserId() == iClient)
-      return Plugin_Continue;
-  
+    return Plugin_Continue;  
 
   new Handle:kv;
   new String:PlayerInfo[60];  
@@ -462,13 +397,6 @@ FirstMenu(iClient)
         return;
       }
     }
-    
-    if(GetConVarInt(c_FF2) && IsFF2Enabled) // Freak Fortress 2 boss security
-      if(FF2_GetBossUserId() == iClient)
-      {
-        CPrintToChat(iClient, "%t", "Sent1", "Boss");
-        return;
-      }
     
     ClientControl[iClient] = iClient;
     
@@ -1009,290 +937,3 @@ public AdminToolMenu_ans(Handle:menu, MenuAction:action, iClient, args)
     }
   }
 }
-
-
-//--------------------------------------------------------------------------------------
-//              Native Functions
-//--------------------------------------------------------------------------------------
-
-
-public Native_AddUnusualEffect(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  new QualityID = GetNativeCell(3);
-  if(QualityID <0 || QualityID >13) // Is valid quality ID
-  {
-    LogMessage("Invalid Quality ID");
-    return false;
-  }
-    
-  new UnusualEffectID = GetNativeCell(4);
-  
-  // Check if unusual effect ID exist
-  new bool:Valid = false;
-  new String:EffectID[8];
-  new String:Line[255];
-  new Len = 0, IDLen = 0;
-  new i,j,data,count = 0;
-  
-  new Handle:file = OpenFile(EffectsList, "rt");
-  if (file == INVALID_HANDLE)
-  {
-    LogError("[UNUSUAL] Could not open file %s", EFFECTSFILE);
-    CloseHandle(file);
-    return false;
-  }
-  
-  while (!IsEndOfFile(file) && !Valid)
-  {
-    count++;
-    ReadFileLine(file, Line, sizeof(Line));
-    Len = strlen(Line);
-    data = 0;
-    TrimString(Line);
-    if(Line[0] == '"')
-    {
-      for (i=0; i<Len; i++)
-      {
-        if (Line[i] == '"')
-        {
-          i++;
-          data++;
-          j = i;
-          while(Line[j] != '"' && j < Len)
-          {
-            if(data == 2)
-            {
-              EffectID[j-i] = Line[j];
-              IDLen = j-i;
-            }
-            j++;
-          }
-          i = j;
-        } 
-      } 
-    }
-
-    if(data != 0 && j <= Len)
-    {
-      if(StringToInt(EffectID) == UnusualEffectID)
-        Valid = true;
-    }
-    else if(Line[0] != '*' && Line[0] != '/')
-      LogError("[UNUSUAL] %s can't read line : %i ",EFFECTSFILE, count);
-
-    for(i = 0; i <= IDLen; i++)
-      EffectID[i] = '\0';
-  }
-
-  if(!Valid)  // Is unusual effect ID exist ?
-  {
-    LogMessage("Invalid Unusual Effect ID");
-    return false;
-  }
-
-  return AddUnusualEffect(-1, PlayerSteamID, GetNativeCell(2), QualityID, UnusualEffectID);
-}
-
-public Native_RemoveEffect(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  new String:WeapID[7];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  if(GetNativeCell(2) < 0)
-    return false;
-  Format(WeapID, sizeof(WeapID), "%d", GetNativeCell(2));
-  
-  return RemoveEffect(-1, PlayerSteamID, WeapID);
-}
-
-public Native_RemovePlayerEffects(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  return RemoveEffect(-1, PlayerSteamID, "-1");
-}
-
-public Native_IsUnusualItem(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  new String:WeapID[7];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  new Handle: kv;
-  kv = CreateKeyValues("Unusual_effects");
-    
-  if(!FileToKeyValues(kv, UnusualEffect))
-  {
-    LogError("Can't open %s",DATAFILE);
-    CloseHandle(kv);
-    return false;
-  }
-    
-  KvJumpToKey(kv, PlayerSteamID, true);
-  Format(WeapID, sizeof(WeapID), "%d", GetNativeCell(2));
-  if(KvJumpToKey(kv, WeapID, false))
-  {
-    CloseHandle(kv);
-    return true;
-  }
-  else
-  {
-    CloseHandle(kv);
-    return false;
-  } 
-}
-
-public Native_GetUnusualItemQuality(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  return GetUnusualItemData(PlayerSteamID, GetNativeCell(2), true);
-}
-
-public Native_GetUnusualItemEffect(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  GetNativeString(1, PlayerSteamID, 60);
-  
-  return GetUnusualItemData(PlayerSteamID, GetNativeCell(2), false);
-}
-
-GetUnusualItemData(String:PlayerSteamID[60], WeaponID, IsQuality)
-{
-  new String:WeapID[7];
-  new Data = -1;
-  new Handle: kv;
-  kv = CreateKeyValues("Unusual_effects");
-    
-  if(!FileToKeyValues(kv, UnusualEffect))
-  {
-    LogError("Can't open %s",DATAFILE);
-    CloseHandle(kv);
-    return -1;
-  }
-    
-  KvJumpToKey(kv, PlayerSteamID, true);
-  Format(WeapID, sizeof(WeapID), "%d", WeaponID);
-  if(KvJumpToKey(kv, WeapID, false))
-  {
-    if(IsQuality)
-      Data = KvGetNum(kv, "quality", -1);
-    else
-      Data = KvGetNum(kv, "effect", -1);
-  }
-  
-  CloseHandle(kv);
-  return Data;
-}
-
-public Native_GetUnusualItemNumber(Handle:plugin, numParams)
-{
-  new String:PlayerSteamID[60];
-  new Count = 0;
-  new Handle: kv;
-  
-  GetNativeString(1, PlayerSteamID, 60);
-  kv = CreateKeyValues("Unusual_effects");
-    
-  if(!FileToKeyValues(kv, UnusualEffect))
-  {
-    LogError("Can't open %s",DATAFILE);
-    CloseHandle(kv);
-    return -1;
-  }
-  
-  KvRewind(kv);
-
-  if(!KvJumpToKey(kv, PlayerSteamID, false))
-    Count = 0;
-  else
-  {
-    if(!KvGotoFirstSubKey(kv, true))
-    {
-      LogError("Plugin ERROR : Database %s corrupted", DATAFILE);
-      return -1;
-    }
-    Count++;
-    
-    while(KvGotoNextKey(kv, true))
-      Count++;
-  }
-  return Count;
-}
-
-public Native_GetUnusualEffectPermission(Handle:plugin, numParams)
-{
-  new Bit = GetNativeCell(1);
-  
-  if(Bit == -1)
-    return Permission[0];
-
-  new i=0;
-  while(FlagsList[i] != Bit && i<21)
-    i++;  
-  
-  if(i < 21)
-    return Permission[i+1];
-  
-  LogError("INVALID FLAGBIT !");
-  return -2;
-}
-
-public Native_SetUnusualEffectPermission(Handle:plugin, numParams)
-{
-  new Bit  = GetNativeCell(1);
-  new Limit = GetNativeCell(2);
-
-  if(Limit < -1)
-  {
-    LogError("INVALID LIMIT !");
-    return false;
-  }
-
-  new String:FlagBitToLetter[22][2] = {"0", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "z"};
-  new Handle:kv;
-  kv = CreateKeyValues("Unusual_permissions");
-  if(!FileToKeyValues(kv, PermissionsFile))
-  {
-    LogError("Can't open %s file", PERMISSIONFILE);
-    CloseHandle(kv);
-    return false;
-  }
-
-  KvGotoFirstSubKey(kv, true);
-  if(Bit == -1)
-    KvSetNum(kv, "0", Limit);
-  else
-  {
-    new i=0;
-    while(FlagsList[i] != Bit && i<21)
-      i++;  
-      
-    if(i<21)
-      KvSetNum(kv, FlagBitToLetter[i+1], Limit);
-    else
-    {
-      CloseHandle(kv);
-      LogError("INVALID FLAGBIT !");
-      return false;
-    }
-  }
-    
-  KvRewind(kv);
-  if(!KeyValuesToFile(kv, PermissionsFile))
-  {
-    CloseHandle(kv);
-    LogError("Plugin ERROR : Can't save %s modifications !", PERMISSIONFILE);
-    return false;
-  }
-  
-  CloseHandle(kv);
-  return LoadPermissions();
-}
-
