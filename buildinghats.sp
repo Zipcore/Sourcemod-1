@@ -61,7 +61,7 @@ new Handle:g_hCvarVersion;
 new Handle:g_hCvarEnabled,			bool:g_bCvarEnabled;
 new Handle:g_hCvarUnusualChance,	Float:g_flCvarUnusualChance;
 
-#define PLUGIN_VERSION 		"1.4"
+#define PLUGIN_VERSION 		"1.6"
 
 public Plugin:myinfo = 
 {
@@ -95,7 +95,7 @@ public OnPluginStart()
 public OnConfigsExecuted()
 {
 	SetConVarString(g_hCvarVersion, PLUGIN_VERSION);
-	g_bCvarEnabled = GetConVarBool(g_hCvarEnabled);
+	g_bCvarEnabled  = GetConVarBool(g_hCvarEnabled);
 	g_flCvarUnusualChance = GetConVarFloat(g_hCvarUnusualChance);
 	ParseConfigurations();
 }
@@ -143,7 +143,7 @@ public Action:Command_iDontWantHatsOnMyThings(client, args)
 					
 					if (GetEntProp(iBuilding, Prop_Send, "m_bMiniBuilding"))
 					{
-						SetVariantInt(1);
+						SetVariantInt(0);
 						AcceptEntityInput(iBuilding, "SetBodyGroup");
 					}
 				}
@@ -156,6 +156,7 @@ public Action:Command_iDontWantHatsOnMyThings(client, args)
 
 public Action:Command_Parse(client, args)
 {
+	ResizeArray(hHatInfo, 1);
 	ReplyToCommand(client, "[Building Hats] Reloading config...");
 	ParseConfigurations();
 	return Plugin_Handled;
@@ -227,51 +228,48 @@ public Action:Event_UpgradeObject(Handle:event, const String:name[], bool:dontBr
 	if(!g_bCvarEnabled) 
 		return Plugin_Continue;
 
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new TFObjectType:object = TFObjectType:GetEventInt(event, "object");
 	
-	if(client >= 1 && client <= MaxClients && IsClientInGame(client) && g_bWantsTheH[client])
+	new iBuilding = GetEventInt(event, "index");
+	if(iBuilding > MaxClients && IsValidEntity(iBuilding))
 	{
-		if(!CheckCommandAccess(client, "sm_buildinghats_access", 0))
+		new builder = GetEntPropEnt(iBuilding, Prop_Send, "m_hBuilder");
+		if(builder >= 1 && builder <= MaxClients && IsClientInGame(builder) && !g_bWantsTheH[builder] || !CheckCommandAccess(builder, "sm_buildinghats_access", 0))
 			return Plugin_Handled;
-	
-		new iBuilding = GetEventInt(event, "index");
-		if(iBuilding > MaxClients && IsValidEntity(iBuilding))
+		
+		if(object == TFObject_Sentry)
 		{
-			if(object == TFObject_Sentry)
+			if (IsValidEntity(g_hatEnt[iBuilding]))
 			{
-				if (IsValidEntity(g_hatEnt[iBuilding]))
-				{
-					AcceptEntityInput(g_hatEnt[iBuilding], "Kill");
-					g_hatEnt[iBuilding] = INVALID_ENT_REFERENCE;
-				}
-				
-				if(IsValidEntity(g_particleEnt[iBuilding]))
-				{
-					AcceptEntityInput(g_particleEnt[iBuilding], "Stop");
-					AcceptEntityInput(g_particleEnt[iBuilding], "Kill");
-					g_particleEnt[iBuilding] = INVALID_ENT_REFERENCE;
-				}
-				
-				CreateTimer(2.0, Timer_ReHat, iBuilding);
+				AcceptEntityInput(g_hatEnt[iBuilding], "Kill");
+				g_hatEnt[iBuilding] = INVALID_ENT_REFERENCE;
 			}
-			if(object == TFObject_Dispenser && GetEntProp(iBuilding, Prop_Send, "m_iUpgradeLevel") == 2)
+			
+			if(IsValidEntity(g_particleEnt[iBuilding]))
 			{
-				if (IsValidEntity(g_hatEnt[iBuilding]))
-				{
-					AcceptEntityInput(g_hatEnt[iBuilding], "Kill");
-					g_hatEnt[iBuilding] = INVALID_ENT_REFERENCE;
-				}
-				
-				if(IsValidEntity(g_particleEnt[iBuilding]))
-				{
-					AcceptEntityInput(g_particleEnt[iBuilding], "Stop");
-					AcceptEntityInput(g_particleEnt[iBuilding], "Kill");
-					g_particleEnt[iBuilding] = INVALID_ENT_REFERENCE;
-				}
-				
-				CreateTimer(2.0, Timer_ReHat, iBuilding);
+				AcceptEntityInput(g_particleEnt[iBuilding], "Stop");
+				AcceptEntityInput(g_particleEnt[iBuilding], "Kill");
+				g_particleEnt[iBuilding] = INVALID_ENT_REFERENCE;
 			}
+			
+			CreateTimer(2.0, Timer_ReHat, iBuilding);
+		}
+		if(object == TFObject_Dispenser && GetEntProp(iBuilding, Prop_Send, "m_iUpgradeLevel") == 2)
+		{
+			if (IsValidEntity(g_hatEnt[iBuilding]))
+			{
+				AcceptEntityInput(g_hatEnt[iBuilding], "Kill");
+				g_hatEnt[iBuilding] = INVALID_ENT_REFERENCE;
+			}
+			
+			if(IsValidEntity(g_particleEnt[iBuilding]))
+			{
+				AcceptEntityInput(g_particleEnt[iBuilding], "Stop");
+				AcceptEntityInput(g_particleEnt[iBuilding], "Kill");
+				g_particleEnt[iBuilding] = INVALID_ENT_REFERENCE;
+			}
+			
+			CreateTimer(2.0, Timer_ReHat, iBuilding);
 		}
 	}
 	
@@ -285,20 +283,21 @@ public Action:Timer_ReHat(Handle:timer, any:iBuilding)
 
 	if(iBuilding > MaxClients && IsValidEntity(iBuilding))
 	{
-		decl String:strPath[PLATFORM_MAX_PATH], String:strOffz[PLATFORM_MAX_PATH], String:strScale[PLATFORM_MAX_PATH];
-		new row = (GetArraySize(hHatInfo) / 3) - 1;
-		new index = (GetRandomInt(0, row)) * 3;
+		decl String:strPath[PLATFORM_MAX_PATH], String:strOffz[16], String:strScale[16], String:strAnima[128];
+		new row = (GetArraySize(hHatInfo) / 4) - 1;
+		new index = (GetRandomInt(0, row)) * 4;
 
 		GetArrayString(hHatInfo, index+1, strPath, sizeof(strPath));
 		GetArrayString(hHatInfo, index+2, strOffz, sizeof(strOffz));
 		GetArrayString(hHatInfo, index+3, strScale, sizeof(strScale));
+		GetArrayString(hHatInfo, index+4, strAnima, sizeof(strAnima));
 		
 		new TFObjectType:object = TFObjectType:TF2_GetObjectType(iBuilding)
 		
 		if(object == TFObject_Sentry)
-			ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Sentry);
+			ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Sentry, strAnima);
 		else if(object == TFObject_Dispenser)
-			ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Dispenser);
+			ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Dispenser, strAnima);
 	}
 	
 	return Plugin_Handled;
@@ -322,18 +321,19 @@ public Action:Event_PlayerBuiltObject(Handle:event, const String:name[], bool:do
 		{
 			if(!GetEntProp(iBuilding, Prop_Send, "m_bCarryDeploy"))
 			{
-				g_ModelIndex[iBuilding] = INVALID_STRING_INDEX;
-				g_flZOffset[iBuilding] = 0.0;
-				g_flModelScale[iBuilding] = 0.0;
+				g_ModelIndex[iBuilding]  = INVALID_STRING_INDEX;
+				g_flZOffset[iBuilding]   = 0.0;
+				g_flModelScale[iBuilding]= 0.0;
 				Format(g_strParticle[iBuilding], sizeof(g_strParticle), "");
 				
-				decl String:strPath[PLATFORM_MAX_PATH], String:strOffz[16], String:strScale[16];
-				new row = (GetArraySize(hHatInfo) / 3) - 1;
-				new index = (GetRandomInt(0, row)) * 3;
+				decl String:strPath[PLATFORM_MAX_PATH], String:strOffz[16], String:strScale[16], String:strAnima[128];
+				new row = (GetArraySize(hHatInfo) / 4) - 1;
+				new index = (GetRandomInt(0, row)) * 4;
 
 				GetArrayString(hHatInfo, index+1, strPath, sizeof(strPath));
 				GetArrayString(hHatInfo, index+2, strOffz, sizeof(strOffz));
 				GetArrayString(hHatInfo, index+3, strScale, sizeof(strScale));
+				GetArrayString(hHatInfo, index+4, strAnima, sizeof(strAnima));
 			
 				if(object == TFObject_Sentry)
 				{
@@ -344,12 +344,12 @@ public Action:Event_PlayerBuiltObject(Handle:event, const String:name[], bool:do
 						CreateTimer(3.0, Timer_TurnTheLightsOff, iBuilding);
 					}
 
-					ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Sentry);
+					ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Sentry, strAnima);
 				//	PrintToChatAll("%s", strPath);
 				}
 				else if(object == TFObject_Dispenser)
 				{
-					ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Dispenser);
+					ParentHatEntity(iBuilding, strPath, StringToFloat(strOffz), StringToFloat(strScale), TFObject_Dispenser, strAnima);
 				//	PrintToChatAll("%s", strPath);
 				}
 			}
@@ -374,7 +374,7 @@ public Action:Timer_TurnTheLightsOff(Handle:timer, any:iBuilding)
 }
 
 //Avert your eyes children.
-ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flModelScale, TFObjectType:object)
+ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flModelScale, TFObjectType:object, const String:strAnimation[])
 {
 	new Float:pPos[3], Float:pAng[3];
 	new builder = GetEntPropEnt(entity, Prop_Send, "m_hBuilder");
@@ -388,24 +388,15 @@ ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flMo
 	if(StrEqual(strModelPath, "", false))
 		g_ModelIndex[entity] = PrecacheModel(smodel);
 	
-//	PrintToChatAll("smodel: %s", smodel);
-//	PrintToChatAll("strModelPath: %s", strModelPath);
-	
 	if(IsValidEntity(prop))
 	{
 		if(!StrEqual(strModelPath, "", false))
-		{
-		//	PrintToChatAll("strModelPath was not empty");
 			DispatchKeyValue(prop, "model", strModelPath); 
-		}
 		else
 			DispatchKeyValue(prop, "model", smodel); 
 			
 		if(g_flModelScale[entity] != 0.0)
-		{
-		//	PrintToChatAll("ModelScale was set");
 			SetEntPropFloat(prop, Prop_Send, "m_flModelScale", g_flModelScale[entity]);
-		}
 		else
 			SetEntPropFloat(prop, Prop_Send, "m_flModelScale", flModelScale);
 
@@ -433,11 +424,16 @@ ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flMo
 		GetEntPropVector(prop, Prop_Send, "m_vecOrigin", pPos);
 		GetEntPropVector(prop, Prop_Send, "m_angRotation", pAng);
 		
-		if(g_flZOffset[entity] != 0.0)
+		if(!StrEqual(strAnimation, "default", false))
 		{
-		//	PrintToChatAll("Offset was set");
-			pPos[2] += g_flZOffset[entity];
+			SetVariantString(strAnimation);
+			AcceptEntityInput(prop, "SetAnimation");  
+			SetVariantString(strAnimation);
+			AcceptEntityInput(prop, "SetDefaultAnimation");
 		}
+		
+		if(g_flZOffset[entity] != 0.0)
+			pPos[2] += g_flZOffset[entity];
 		else
 			pPos[2] += flZOffset;
 			
@@ -468,77 +464,75 @@ ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flMo
 			
 		if(g_flModelScale[entity] == 0.0)
 			g_flModelScale[entity] = flModelScale;
-		
-		new iParticle = CreateEntityByName("info_particle_system"); 
-		if(IsValidEdict(iParticle))
+
+		if(g_particleEnt[entity] == INVALID_ENT_REFERENCE && GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") <= 1 && CheckCommandAccess(builder, "sm_buildinghats_unusuals", 0))
 		{
-			new Float:flPos[3]; 
-			new bool:kill = false;
-			new sParticle = GetRandomInt(0, sizeof(g_sParticleList) -1);
-			
-			if(!StrEqual(g_strParticle[entity], "", false))
-				DispatchKeyValue(iParticle, "effect_name", g_strParticle[entity]); 
-			else
+			new iParticle = CreateEntityByName("info_particle_system"); 
+			if(IsValidEdict(iParticle))
 			{
-				if(GetRandomFloat(0.0, 1.0) <= g_flCvarUnusualChance)
+				new Float:flPos[3]; 
+				new bool:kill = false;
+				new sParticle = GetRandomInt(0, sizeof(g_sParticleList)-1);
+				
+				if(!StrEqual(g_strParticle[entity], "", false))
+					DispatchKeyValue(iParticle, "effect_name", g_strParticle[entity]); 
+				else
 				{
-					DispatchKeyValue(iParticle, "effect_name", g_sParticleList[sParticle][0]); 
+					if(GetRandomFloat(0.0, 1.0) <= g_flCvarUnusualChance)
+						DispatchKeyValue(iParticle, "effect_name", g_sParticleList[sParticle][0]); 
+					else
+						kill = true;
+				}
+				
+				if(!kill)
+				{
+					DispatchSpawn(iParticle); 
+					
+					SetVariantString("!activator"); 
+					AcceptEntityInput(iParticle, "SetParent", entity); 
+					ActivateEntity(iParticle); 
+
+					if(object == TFObject_Dispenser)
+					{
+						SetVariantString("build_point_0");
+					}
+					else if(object == TFObject_Sentry)
+					{
+						if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") < 3)
+							SetVariantString("build_point_0");
+						else
+							SetVariantString("rocket_r");
+					}
+					AcceptEntityInput(iParticle, "SetParentAttachment", entity);
+					
+					GetEntPropVector(iParticle, Prop_Send, "m_vecOrigin", flPos);
+					
+					if(object == TFObject_Dispenser)
+					{
+						flPos[2] += 13.0;	//Make sure the effect is on top of the dispenser
+						
+						if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") == 3)
+							flPos[2] += 8.0;	//Account for level 3 dispenser
+					}
+					
+					if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") == 3 && object != TFObject_Dispenser)
+					{
+						flPos[2] += 6.5;	//Level 3 sentry offsets
+						flPos[0] -= 11.0;	//Gotta get that effect on top of the missile thing
+					}
+					
+					SetEntPropVector(iParticle, Prop_Send, "m_vecOrigin", flPos);
+
+					AcceptEntityInput(iParticle, "start"); 
+					
+					g_particleEnt[entity] = EntIndexToEntRef(iParticle);
+					
+					if(StrEqual(g_strParticle[entity], "", false))
+						Format(g_strParticle[entity], sizeof(g_strParticle), "%s", g_sParticleList[sParticle][0]);
 				}
 				else
-					kill = true;
+					AcceptEntityInput(iParticle, "Kill");
 			}
-			
-		//	PrintToChatAll("%s", g_sParticleList[sParticle][0]);
-			if(!kill)
-			{
-				DispatchSpawn(iParticle); 
-				
-				SetVariantString("!activator"); 
-				AcceptEntityInput(iParticle, "SetParent", entity); 
-				ActivateEntity(iParticle); 
-
-				if(object == TFObject_Dispenser)
-				{
-					SetVariantString("build_point_0");
-				}
-				else if(object == TFObject_Sentry)
-				{
-					if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") < 3)
-						SetVariantString("build_point_0");
-					else
-						SetVariantString("rocket_r");
-				}
-				AcceptEntityInput(iParticle, "SetParentAttachment", entity);
-				
-				GetEntPropVector(iParticle, Prop_Send, "m_vecOrigin", flPos);
-				
-				if(object == TFObject_Dispenser)
-				{
-					flPos[2] += 13.0;	//Make sure the effect is on top of the dispenser
-					
-					if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") == 3)
-					{
-						flPos[2] += 8.0;	//Account for level 3 dispenser
-					}
-				}
-				
-				if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") == 3 && object != TFObject_Dispenser)
-				{
-					flPos[2] += 6.5;	//Level 3 sentry offsets
-					flPos[0] -= 11.0;	//Gotta get that effect on top of the missile thing
-				}
-				
-				SetEntPropVector(iParticle, Prop_Send, "m_vecOrigin", flPos);
-
-				AcceptEntityInput(iParticle, "start"); 
-				
-				g_particleEnt[entity] = EntIndexToEntRef(iParticle);
-				
-				if(StrEqual(g_strParticle[entity], "", false))
-					Format(g_strParticle[entity], sizeof(g_strParticle), "%s", g_sParticleList[sParticle][0]);
-			}
-			else
-				AcceptEntityInput(iParticle, "Kill");
 		}
 	}
 }
@@ -551,6 +545,7 @@ bool:ParseConfigurations()
 	BuildPath(Path_SM, strPath, sizeof(strPath), strFileName);
 
 	LogMessage("[Building Hats] Executing configuration file %s", strPath);    
+	
 	if (FileExists(strPath, true))
 	{
 		new Handle:kvConfig = CreateKeyValues("TF2_Buildinghats");
@@ -559,17 +554,19 @@ bool:ParseConfigurations()
 		
 		do
 		{
-			decl String:strMpath[PLATFORM_MAX_PATH], String:strOffz[16], String:strScale[16]; 
+			decl String:strMpath[PLATFORM_MAX_PATH], String:strOffz[16], String:strScale[16], String:strAnima[128]; 
 
 			KvGetString(kvConfig, "modelpath",	strMpath, sizeof(strMpath));
 			KvGetString(kvConfig, "offset", 	strOffz,  sizeof(strOffz));
 			KvGetString(kvConfig, "modelscale", strScale, sizeof(strScale));
+			KvGetString(kvConfig, "animation",  strAnima, sizeof(strAnima));
 			
 			PrecacheModel(strMpath);
 			
 			PushArrayString(hHatInfo, strMpath);
 			PushArrayString(hHatInfo, strOffz);
 			PushArrayString(hHatInfo, strScale);
+			PushArrayString(hHatInfo, strAnima);
 		}
 		while (KvGotoNextKey(kvConfig));
 
