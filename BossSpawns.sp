@@ -6,8 +6,8 @@
 #include <morecolors>
 #include <autoexecconfig>
 
-#define PLUGIN_NAME "[TF2] Boss Spawns"
-#define PLUGIN_VERSION "1.0.5a"
+#define PLUGIN_NAME "[TF2] Boss Spawns JsFix"
+#define PLUGIN_VERSION "1.0.5g"
 
 #define PLUGIN_TAG "[BossSpawns]"
 #define PLUGIN_TAG_COLORED "{unusual}[BossSpawns]"
@@ -94,20 +94,24 @@ public OnPluginStart()
   }
   
   RegAdminCmd("sm_hatman", Command_SpawnHatman, ADMFLAG_GENERIC, "Spawns the Horsemann - Usage: sm_hatman <scale> <glow 0/1>");
+  RegAdminCmd("sm_horsemann", Command_SpawnHatman, ADMFLAG_GENERIC, "Spawns the Horsemann - Usage: sm_horsemann <scale> <glow 0/1>");
   RegAdminCmd("sm_eyeboss", Command_SpawnEyeBoss, ADMFLAG_GENERIC, "Spawns the MONOCULUS! - Usage: sm_eyeboss <scale> <glow 0/1>");
   RegAdminCmd("sm_eyeboss_red", Command_SpawnEyeBossRED, ADMFLAG_GENERIC, "Spawns the RED Spectral MONOCULUS! - Usage: sm_eyeboss_red <scale> <glow 0/1>");
   RegAdminCmd("sm_eyeboss_blue", Command_SpawnEyeBossBLU, ADMFLAG_GENERIC, "Spawns the BLU Spectral MONOCULUS! - Usage: sm_eyeboss_blue <scale> <glow 0/1>");
   RegAdminCmd("sm_merasmus", Command_SpawnMerasmus, ADMFLAG_GENERIC, "Spawns Merasmus - Usage: sm_merasmus <scale> <glow 0/1>");
+  RegAdminCmd("sm_skele", Command_SpawnGreenSkeleton, ADMFLAG_GENERIC, "Spawns a Green Skeleton - Usage: sm_skele <scale> <glow 0/1>");
   RegAdminCmd("sm_skelegreen", Command_SpawnGreenSkeleton, ADMFLAG_GENERIC, "Spawns a Green Skeleton - Usage: sm_skelegreen <scale> <glow 0/1>");
   RegAdminCmd("sm_skelered", Command_SpawnREDSkeleton, ADMFLAG_GENERIC, "Spawns a RED Skeleton - Usage: sm_skelered <scale> <glow 0/1>");
   RegAdminCmd("sm_skeleblue", Command_SpawnBLUSkeleton, ADMFLAG_GENERIC, "Spawns a BLU Skeleton - Usage: sm_skeleblue <scale> <glow 0/1>");
   RegAdminCmd("sm_skeleking", Command_SpawnSkeletonKing, ADMFLAG_GENERIC, "Spawns a Skeleton King - Usage: sm_skeleking <scale> <glow 0/1>");
   
   RegAdminCmd("sm_slayhatman", Command_SlayHatman, ADMFLAG_GENERIC, "Slays all Horsemenn on the map - Usage: sm_slayhatman");
+  RegAdminCmd("sm_slayhorsemann", Command_SlayHatman, ADMFLAG_GENERIC, "Slays all Horsemenn on the map - Usage: sm_slayhorsemann");
   RegAdminCmd("sm_slayeyeboss", Command_SlayEyeBoss, ADMFLAG_GENERIC, "Slays all MONOCULUS! on the map - Usage: sm_slayeyeboss");
   RegAdminCmd("sm_slayeyeboss_red", Command_SlayEyeBossRED, ADMFLAG_GENERIC, "Slays all RED Spectral MONOCULUS! on the map - Usage: sm_slayeyeboss_red");
   RegAdminCmd("sm_slayeyeboss_blue", Command_SlayEyeBossBLU, ADMFLAG_GENERIC, "Slays all BLU Spectral MONOCULUS! on the map - Usage: sm_slayeyeboss_blue");
   RegAdminCmd("sm_slaymerasmus", Command_SlayMerasmus, ADMFLAG_GENERIC, "Slays all Merasmus on the map - Usage: sm_slaymerasmus");
+  RegAdminCmd("sm_slayskele", Command_SlayGreenSkeleton, ADMFLAG_GENERIC, "Slays all Green Skeletons on the map - Usage: sm_slayskele");
   RegAdminCmd("sm_slayskelegreen", Command_SlayGreenSkeleton, ADMFLAG_GENERIC, "Slays all Green Skeletons on the map - Usage: sm_slayskelegreen");
   RegAdminCmd("sm_slayskelered", Command_SlayREDSkeleton, ADMFLAG_GENERIC, "Slays all RED Skeletons on the map - Usage: sm_slayskelered");
   RegAdminCmd("sm_slayskeleblue", Command_SlayBLUSkeleton, ADMFLAG_GENERIC, "Slays all BLU Skeletons on the map - Usage: sm_slayskeleblue");
@@ -285,7 +289,7 @@ public Action:Command_SpawnHatman(client, args)
   
   if (SpawnBoss("headless_hatman", fScale, 0, 10.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {unusual}Horseless Headless Horsemann!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned the Horseless Headless Horsemann!", client);
     LogAction(client, -1, "\"%L\" spawned boss: Horseless Headless Horsemann", client);
     CReplyToCommand(client, "%s {default}You've spawned the {unusual}Horseless Headless Horsemann!", PLUGIN_TAG_COLORED);
   }
@@ -349,7 +353,7 @@ public Action:Command_SpawnEyeBoss(client, args)
   
   if (SpawnBoss("eyeball_boss", fScale, 5, 50.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {unusual}MONOCULUS!", client);
+    ShowActivityEx(client, "[BOSS] ", "spawned the MONOCULUS!", client);
     LogAction(client, -1, "\"%L\" spawned boss: MONOCULUS", client);
     CReplyToCommand(client, "%s {default}You've spawned the {unusual}MONOCULUS!", PLUGIN_TAG_COLORED);
   }
@@ -412,7 +416,7 @@ public Action:Command_SpawnEyeBossRED(client, args)
   
   if (SpawnBoss("eyeball_boss", fScale, 2, -25.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {red}RED Spectral MONOCULUS!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned the RED Spectral MONOCULUS!", client);
     LogAction(client, -1, "\"%L\" spawned boss: RED Spectral MONOCULUS", client);
     CReplyToCommand(client, "%s {default}You've spawned the {red}RED Spectral MONOCULUS!", PLUGIN_TAG_COLORED);
   }
@@ -475,7 +479,7 @@ public Action:Command_SpawnEyeBossBLU(client, args)
   
   if (SpawnBoss("eyeball_boss", fScale, 1, -25.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {blue}BLU Spectral MONOCULUS!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned the BLU Spectral MONOCULUS!", client);
     LogAction(client, -1, "\"%L\" spawned boss: BLU Spectral MONOCULUS", client);
     CReplyToCommand(client, "%s {default}You've spawned the {blue}BLU Spectral MONOCULUS!", PLUGIN_TAG_COLORED);
   }
@@ -538,7 +542,7 @@ public Action:Command_SpawnMerasmus(client, args)
   
   if (SpawnBoss("merasmus", fScale, 0, 0.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned {unusual}Merasmus!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned Merasmus!", client);
     LogAction(client, -1, "\"%L\" spawned boss: Merasmus", client);
     CReplyToCommand(client, "%s {default}You've spawned {unusual}Merasmus!", PLUGIN_TAG_COLORED);
   }
@@ -601,7 +605,7 @@ public Action:Command_SpawnGreenSkeleton(client, args)
   
   if (SpawnBoss("tf_zombie", fScale, 0, 0.0, "2", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {community}Green Skeleton!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned a Green Skeleton!", client);
     LogAction(client, -1, "\"%L\" spawned boss: Green Skeleton", client);
     CReplyToCommand(client, "%s {default}You've spawned {community}Green Skeleton!", PLUGIN_TAG_COLORED);
   }
@@ -664,7 +668,7 @@ public Action:Command_SpawnREDSkeleton(client, args)
   
   if (SpawnBoss("tf_zombie", fScale, 2, 0.0, "0", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {red}RED Skeleton!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned a RED Skeleton!", client);
     LogAction(client, -1, "\"%L\" spawned boss: RED Skeleton", client);
     CReplyToCommand(client, "%s {default}You've spawned {red}RED Skeleton!", PLUGIN_TAG_COLORED);
   }
@@ -727,7 +731,7 @@ public Action:Command_SpawnBLUSkeleton(client, args)
   
   if (SpawnBoss("tf_zombie", fScale, 3, 0.0, "1", bGlow ? true : false))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {blue}BLU Skeleton!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned a BLU Skeleton!", client);
     LogAction(client, -1, "\"%L\" spawned boss: BLU Skeleton", client);
     CReplyToCommand(client, "%s {default}You've spawned {blue}BLU Skeleton!", PLUGIN_TAG_COLORED);
   }
@@ -790,7 +794,7 @@ public Action:Command_SpawnSkeletonKing(client, args)
   
   if (SpawnBoss("tf_zombie_spawner", fScale, 0, 0.0, "0", bGlow ? true : false, true))
   {
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {unusual}Skeleton King!", client);
+    ShowActivityEx(client, "[BOSS] ", "%s spawned a Skeleton King!", client);
     LogAction(client, -1, "\"%L\" spawned boss: Skeleton King", client);
     CReplyToCommand(client, "%s {default}You've spawned {unusual}Skeleton King!", PLUGIN_TAG_COLORED);
     
@@ -859,7 +863,7 @@ public Action:Command_SlayHatman(client, args)
     new Handle:g_Event = CreateEvent("pumpkin_lord_killed", true);
     FireEvent(g_Event);
     AcceptEntityInput(entity, "Kill");
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {unusual}Horseless Headless Horsemann", client);
+    ShowActivityEx(client, "[BOSS] ", "%s slayed the Horseless Headless Horsemann", client);
     LogAction(client, -1, "\"%L\" slayed boss: Horseless Headless Horsemann", client);
     CReplyToCommand(client, "%s {default}You've slayed the {unusual}Horseless Headless Horsemann", PLUGIN_TAG_COLORED);
   }
@@ -885,7 +889,7 @@ public Action:Command_SlayEyeBoss(client, args)
       new Handle:g_Event = CreateEvent("eyeball_boss_killed", true);
       FireEvent(g_Event);
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {unusual}MONOCULUS!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the MONOCULUS!", client);
       LogAction(client, -1, "\"%L\" slayed boss: MONOCULUS", client);
       CReplyToCommand(client, "%s {default}You've slayed the {unusual}MONOCULUS!", PLUGIN_TAG_COLORED);
     }
@@ -912,7 +916,7 @@ public Action:Command_SlayEyeBossRED(client, args)
       new Handle:g_Event = CreateEvent("eyeball_boss_killed", true);
       FireEvent(g_Event);
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {red}RED Spectral MONOCULUS!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the RED Spectral MONOCULUS!", client);
       LogAction(client, -1, "\"%L\" slayed boss: RED Spectral MONOCULUS", client);
       CReplyToCommand(client, "%s {default}You've slayed the {red}RED Spectral MONOCULUS!", PLUGIN_TAG_COLORED);
     }
@@ -939,7 +943,7 @@ public Action:Command_SlayEyeBossBLU(client, args)
       new Handle:g_Event = CreateEvent("eyeball_boss_killed", true);
       FireEvent(g_Event);
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {blue}BLU Spectral MONOCULUS!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the BLU Spectral MONOCULUS!", client);
       LogAction(client, -1, "\"%L\" slayed boss: BLU Spectral MONOCULUS", client);
       CReplyToCommand(client, "%s {default}You've slayed the {blue}BLU Spectral MONOCULUS!", PLUGIN_TAG_COLORED);
     }
@@ -963,7 +967,7 @@ public Action:Command_SlayMerasmus(client, args)
     new Handle:g_Event = CreateEvent("merasmus_killed", true);
     FireEvent(g_Event);
     AcceptEntityInput(entity, "Kill");
-    CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed {unusual}Merasmus", client);
+    ShowActivityEx(client, "[BOSS] ", "%s slayed Merasmus", client);
     LogAction(client, -1, "\"%L\" slayed boss: Merasmus", client);
     CReplyToCommand(client, "%s {default}You've slayed the {unusual}Merasmus", PLUGIN_TAG_COLORED);
   }
@@ -987,7 +991,7 @@ public Action:Command_SlayGreenSkeleton(client, args)
     if (m_iTeamNum == 3)
     {
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {community}Green Skeleton!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the Green Skeleton!", client);
       LogAction(client, -1, "\"%L\" slayed boss: Green Skeleton", client);
       CReplyToCommand(client, "%s {default}You've slayed the {community}Green Skeleton", PLUGIN_TAG_COLORED);
     }
@@ -1012,7 +1016,7 @@ public Action:Command_SlayREDSkeleton(client, args)
     if (m_iTeamNum == 1)
     {
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {red}RED Skeleton!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the RED Skeleton!", client);
       LogAction(client, -1, "\"%L\" slayed boss: RED Skeleton", client);
       CReplyToCommand(client, "%s {default}You've slayed the {red}RED Skeleton", PLUGIN_TAG_COLORED);
     }
@@ -1037,7 +1041,7 @@ public Action:Command_SlayBLUSkeleton(client, args)
     if (m_iTeamNum == 2)
     {
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {blue}BLU Skeleton!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the BLU Skeleton!", client);
       LogAction(client, -1, "\"%L\" slayed boss: BLU Skeleton", client);
       CReplyToCommand(client, "%s {default}You've slayed the {blue}BLU Skeleton", PLUGIN_TAG_COLORED);
     }
@@ -1064,7 +1068,7 @@ public Action:Command_SlaySkeletonKing(client, args)
     if (StrEqual(sBuffer, "SkeletonKing"))
     {
       AcceptEntityInput(entity, "Kill");
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s slayed the {unusual}Skeleton King!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s slayed the Skeleton King!", client);
       LogAction(client, -1, "\"%L\" slayed boss: Skeleton King", client);
       CReplyToCommand(client, "%s {default}You've slayed the {unusual}Skeleton King", PLUGIN_TAG_COLORED);
     }
@@ -1307,7 +1311,7 @@ public Native_SpawnHatman(Handle:plugin, numParams)
   {
     if (bSpew)
     {
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {unusual}Horseless Headless Horsemann via natives!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s spawned the Horseless Headless Horsemann via natives!", client);
       LogAction(client, -1, "\"%L\" spawned boss via natives: Horseless Headless Horsemann", client);
       CReplyToCommand(client, "%s {default}You've spawned the {unusual}Horseless Headless Horsemann via natives!", PLUGIN_TAG_COLORED);
     }
@@ -1352,19 +1356,19 @@ public Native_SpawnEyeboss(Handle:plugin, numParams)
       {
       case 0:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {unusual}MONOCULUS via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned the MONOCULUS via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: MONOCULUS", client);
           CReplyToCommand(client, "%s {default}You've spawned the {unusual}MONOCULUS via natives!", PLUGIN_TAG_COLORED);
         }
       case 1:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {red}RED Spectral MONOCULUS via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned the RED Spectral MONOCULUS via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: RED Spectral MONOCULUS", client);
           CReplyToCommand(client, "%s {default}You've spawned the {red}RED Spectral MONOCULUS via natives!", PLUGIN_TAG_COLORED);
         }
       case 2:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned the {blue}BLU Spectral MONOCULUS via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned the BLU Spectral MONOCULUS via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: BLU Spectral MONOCULUS", client);
           CReplyToCommand(client, "%s {default}You've spawned the {blue}BLU Spectral MONOCULUS via natives!", PLUGIN_TAG_COLORED);
         }
@@ -1419,7 +1423,7 @@ public Native_SpawnMerasmus(Handle:plugin, numParams)
   {
     if (bSpew)
     {
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned {unusual}Merasmus via natives!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s spawned Merasmus via natives!", client);
       LogAction(client, -1, "\"%L\" spawned boss via natives: Merasmus", client);
       CReplyToCommand(client, "%s {default}You've spawned {unusual}Merasmus via natives!", PLUGIN_TAG_COLORED);
     }
@@ -1467,19 +1471,19 @@ public Native_SpawnSkeleton(Handle:plugin, numParams)
       {
       case 0:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {community}Green Skeleton via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned a Green Skeleton via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: Green Skeleton", client);
           CReplyToCommand(client, "%s {default}You've spawned {community}Green Skeleton via natives!", PLUGIN_TAG_COLORED);
         }
       case 1:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {red}RED Skeleton via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned a RED Skeleton via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: RED Skeleton", client);
           CReplyToCommand(client, "%s {default}You've spawned {red}RED Skeleton via natives!", PLUGIN_TAG_COLORED);
         }
       case 2:
         {
-          CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {blue}BLU Skeleton via natives!", client);
+          ShowActivityEx(client, "[BOSS] ", "%s spawned a BLU Skeleton via natives!", client);
           LogAction(client, -1, "\"%L\" spawned boss via natives: BLU Skeleton", client);
           CReplyToCommand(client, "%s {default}You've spawned {blue}BLU Skeleton via natives!", PLUGIN_TAG_COLORED);
         }
@@ -1533,7 +1537,7 @@ public Native_SpawnSkeletonKing(Handle:plugin, numParams)
   {
     if (bSpew)
     {
-      CShowActivity(client, "{unusual}[BOSS] ", "{default}%s spawned a {unusual}Skeleton King via natives!", client);
+      ShowActivityEx(client, "[BOSS] ", "%s spawned a Skeleton King via natives!", client);
       LogAction(client, -1, "\"%L\" spawned boss via natives: Skeleton King", client);
       CReplyToCommand(client, "%s {default}You've spawned {unusual}Skeleton King via natives!", PLUGIN_TAG_COLORED);
     }
