@@ -5,7 +5,7 @@
 #include <tf2items>
 #include <tf2itemsinfo>
 
-#define PLUGIN_VERSION "2.15.1"
+#define PLUGIN_VERSION "2.15.2"
 #define EFFECTSFILE "unusual_list.cfg"
 #define PERMISSIONFILE "unusual_permissions.cfg"
 #define DATAFILE "unusual_effects.txt"
@@ -613,14 +613,40 @@ bool:RemoveEffect(User, String:PlayerSteamID[60], String:WeapID[7])
 
 PanelEffect(iClient)
 {
+  new Handle: kv;
+  kv = CreateKeyValues("Unusual_effects");
+  if(!FileToKeyValues(kv, UnusualEffect))
+  {
+    LogError("Can't open %s file",DATAFILE);
+    CloseHandle(kv);
+    return;
+  }
+  if(!isAuthorized(kv, ClientControl[iClient], true))
+  {
+    CPrintToChat(iClient, "%t", "Sent7");
+    CloseHandle(kv);
+    return;
+  }
+  CloseHandle(kv);
+  new EntitiesID = GetEntPropEnt(ClientControl[iClient], Prop_Data, "m_hActiveWeapon");
+  if(EntitiesID < 0)
+    return;
+  ClientItems[iClient] = GetEntProp(EntitiesID, Prop_Send, "m_iItemDefinitionIndex");
+  
   new String:EffectID[8];
   new String:EffectName[128];
   new String:Line[255];
   new Len = 0, NameLen = 0, IDLen = 0;
   new i,j,data,count = 0;
 
+  decl String:Title[64];
+  decl String:WeapName[64];
   new Handle:UnusualMenu = CreateMenu(UnusualMenuAnswer);
-  SetMenuTitle(UnusualMenu, "Select an unusual effect:");
+  
+  TF2II_GetItemName(ClientItems[iClient], WeapName, sizeof(WeapName)); 
+  Format(Title, sizeof(Title), "Select an effect: %s",WeapName);
+  SetMenuTitle(UnusualMenu, Title);
+
   AddMenuItem(UnusualMenu, "0", "Show effects");
   
   new Handle:file = OpenFile(EffectsList, "rt");
