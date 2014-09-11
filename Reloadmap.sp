@@ -5,7 +5,7 @@
 /*
   Defines
 */
-#define PLUGIN_VERSION "0.1"
+#define PLUGIN_VERSION "0.2"
 /*
   Strings
 */
@@ -36,18 +36,22 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 // #----------------------------------------------CVARS CONFIGURATION------------------------------------------------#
-  ReloadCntrMsg = CreateConVar("reload_cntr_msg","10","Seconds left until centre message", FCVAR_PLUGIN);
+  ReloadCntrMsg = CreateConVar("reload_cntr_msg","5","Seconds left until centre message", FCVAR_PLUGIN);
 // #---------------------------------------------------COMMANDS------------------------------------------------------#
-  RegAdminCmd("sm_reloadmap", Command_ReloadMap, ADMFLAG_SLAY, "Toggle Server Locking");
+  RegAdminCmd("sm_reloadmap", Command_ReloadMap, ADMFLAG_SLAY, "Reload map after 15 seconds");
 }
 
 public Action:Command_ReloadMap(client, args)
 {
   GetCurrentMap(currentmap, 65);
   ReloadTime = 15;
-  if(ReloadTimer == INVALID_HANDLE)
+  if(ReloadTimer == INVALID_HANDLE) 
   {
     ReloadTimer = CreateTimer(1.0, tReloadMap, INVALID_HANDLE, TIMER_REPEAT);
+  }
+  else
+  {
+    ReplyToCommand(client, "Error: Handle is not cleared, pls report dis");
   }
 }
   
@@ -64,7 +68,11 @@ public Action:tReloadMap(Handle:timer)
   if(ReloadTime <= -1)
   {
 // #-----------------------RELOAD MAP------------------------#
-    KillTimer(ReloadTimer);
+    if(ReloadTimer != INVALID_HANDLE)
+    {
+      KillTimer(ReloadTimer);
+      ReloadTimer = INVALID_HANDLE;
+    }
     PrintToChatAll("Reloading Map");
     ServerCommand("sm_map %s", currentmap);
   }
