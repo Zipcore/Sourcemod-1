@@ -61,7 +61,7 @@ new Handle:g_hCvarVersion;
 new Handle:g_hCvarEnabled,			bool:g_bCvarEnabled;
 new Handle:g_hCvarUnusualChance,	Float:g_flCvarUnusualChance;
 
-#define PLUGIN_VERSION 		"1.6"
+#define PLUGIN_VERSION 		"1.7"
 
 public Plugin:myinfo = 
 {
@@ -465,13 +465,17 @@ ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flMo
 		if(g_flModelScale[entity] == 0.0)
 			g_flModelScale[entity] = flModelScale;
 
-		if(g_particleEnt[entity] == INVALID_ENT_REFERENCE && GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") <= 1 && CheckCommandAccess(builder, "sm_buildinghats_unusuals", 0))
+		if(g_particleEnt[entity] == INVALID_ENT_REFERENCE && CheckCommandAccess(builder, "sm_buildinghats_unusuals", 0))
 		{
 			new iParticle = CreateEntityByName("info_particle_system"); 
 			if(IsValidEdict(iParticle))
 			{
 				new Float:flPos[3]; 
 				new bool:kill = false;
+				
+				if(GetEntProp(entity, Prop_Send, "m_iUpgradeLevel") > 1 && StrEqual(g_strParticle[entity], "", false))
+					kill = true;
+				
 				new sParticle = GetRandomInt(0, sizeof(g_sParticleList)-1);
 				
 				if(!StrEqual(g_strParticle[entity], "", false))
@@ -483,7 +487,7 @@ ParentHatEntity(entity, const String:smodel[], Float:flZOffset = 0.0, Float:flMo
 					else
 						kill = true;
 				}
-				
+
 				if(!kill)
 				{
 					DispatchSpawn(iParticle); 
